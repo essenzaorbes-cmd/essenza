@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'dummy_key', {
   apiVersion: '2023-10-16' as any,
 })
 
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     event = stripe.webhooks.constructEvent(
       payload,
       sig,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      process.env.STRIPE_WEBHOOK_SECRET || 'dummy_secret'
     )
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 400 })
@@ -31,8 +31,8 @@ export async function POST(request: Request) {
 
     // Need a service role client to bypass RLS and insert the order
     const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://dummy.supabase.co',
+      process.env.SUPABASE_SERVICE_ROLE_KEY || 'dummy_role_key'
     )
 
     // Insert order into Supabase using the service role key
